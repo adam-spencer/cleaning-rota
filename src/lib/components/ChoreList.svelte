@@ -12,6 +12,7 @@
 		chore: Chore | null;
 		person: Person | null;
 		away: string | null;
+		awayDays: number;
 		done: { by: string | null; at: string } | null;
 	}
 
@@ -103,6 +104,14 @@
 					aria-label="{a.person?.name ?? 'Nobody'}: {a.chore?.name ?? 'week off'}{done ? ', done' : ''}"
 					onclick={() => toggle(a)}
 				>
+					{#key week}
+						{#if a.awayDays >= 4}
+							{@const label = a.awayDays === 7 ? 'Away all week' : 'Away most of the week'}
+							<span class="bang" title={label} role="img" aria-label={label.toLowerCase()}>
+								<Pixel rows={GLYPHS.bang} size={14} />
+							</span>
+						{/if}
+					{/key}
 					<span class="who">
 						{#key `${week}:${a.person?.id}`}
 							<span class="person" in:slot={{ y: 16 * dir, delay: i * 45 }} out:slot={{ y: -16 * dir, duration: 140 }}>
@@ -248,6 +257,33 @@
 		font-weight: 600;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+
+	/* "!" in the margin left of someone who's away most of the week (so their name doesn't
+	   move); nudges once to catch the eye. */
+	.bang {
+		position: absolute;
+		left: -12px;
+		top: 50%;
+		margin-top: -7px;
+		line-height: 0;
+		animation: nudge 600ms steps(4) 400ms both;
+	}
+
+	@keyframes nudge {
+		0%,
+		100% {
+			translate: 0 0;
+		}
+		25% {
+			translate: 0 -3px;
+		}
+		50% {
+			translate: 0 0;
+		}
+		75% {
+			translate: 0 -2px;
+		}
 	}
 
 	.nobody {

@@ -189,6 +189,8 @@ export interface Assignment {
 	chore: Chore | null;
 	person: Person | null;
 	away: string | null;
+	/** How many of the week's 7 days they're away. */
+	awayDays: number;
 	done: { by: string | null; at: string } | null;
 }
 
@@ -212,10 +214,12 @@ export function getWeek(weekStart: string): Assignment[] {
 		const c = chore ? completions.get(chore.id) : undefined;
 		// In past weeks a finished chore stays credited to whoever did it, even if the roster changed since.
 		if (isPast && c && c.person_id !== person?.id) person = people.find((p) => p.id === c.person_id) ?? person;
+		const days = person ? awayDays(absences, person.id, weekStart) : [];
 		return {
 			chore,
 			person,
-			away: person ? describeAway(awayDays(absences, person.id, weekStart)) : null,
+			away: person ? describeAway(days) : null,
+			awayDays: days.filter(Boolean).length,
 			done: c ? { by: c.by, at: c.done_at } : null
 		};
 	});

@@ -15,3 +15,20 @@ npm run build && DB_PATH=/var/lib/cleaning-rota/rota.db PORT=3000 node build
 
 Each week everyone moves one chore down the list. People who are away are flagged, never reassigned.
 Data lives in `data/rota.db` by default (`DB_PATH` overrides).
+
+## Deploying to the Pi
+
+Runs in Docker on a Raspberry Pi (`ssh pi` must work — see `~/.ssh/config`). One-off setup on the Mac:
+
+```sh
+docker context create pi --docker "host=ssh://pi"
+```
+
+Then:
+
+```sh
+npm run deploy     # builds on the Pi and restarts the container
+npm run logs       # tail the server logs
+```
+
+The app is served on port 80 at `http://cleaning-rota.local`. The database lives in the `cleaning-rota-data` Docker volume, so it survives rebuilds.

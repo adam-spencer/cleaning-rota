@@ -11,7 +11,9 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest run",
-		"start": "node build"
+		"start": "node build",
+		"deploy": "docker --context pi compose up -d --build",
+		"logs": "docker --context pi compose logs -f --tail 100"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-node": "^6.0.0",

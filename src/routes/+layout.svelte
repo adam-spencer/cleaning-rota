@@ -4,11 +4,13 @@
 	import { onNavigate, refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { attachDissolve, dissolveIn, dissolveOut } from '#lib/dissolve.ts';
-	import { pop } from '#lib/transitions.ts';
+	import { pop, slot } from '#lib/transitions.ts';
 	import { GLYPHS, SHAPES, bitmapPath } from '#lib/icons.ts';
 	import { me } from '#lib/me.svelte.ts';
+	import { greeting } from '#lib/greeting.ts';
 	import { theme } from '#lib/theme.svelte.ts';
 	import Pixel from '#lib/components/Pixel.svelte';
+	import Shape from '#lib/components/Shape.svelte';
 	import Toast from '#lib/components/Toast.svelte';
 	import WhoAmI from '#lib/components/WhoAmI.svelte';
 	import type { LayoutProps } from './$types';
@@ -44,11 +46,21 @@
 		me.load();
 		theme.load();
 		loaded = true;
+		now = new Date();
+		const clock = setInterval(() => (now = new Date()), 60_000);
 		// Phones keep tabs open for days: pick up other people's changes when coming back.
 		const refresh = () => document.visibilityState === 'visible' && refreshAll();
 		document.addEventListener('visibilitychange', refresh);
-		return () => document.removeEventListener('visibilitychange', refresh);
+		return () => {
+			clearInterval(clock);
+			document.removeEventListener('visibilitychange', refresh);
+		};
 	});
+
+	/** The device's clock; only known in the browser, ticked each minute so the greeting keeps up. */
+	let now = $state<Date | null>(null);
+	const current = $derived(data.people.find((p) => p.id === me.id));
+	const heading = $derived(current && now ? greeting(current.name, now) : data.houseName);
 
 	/** Whether this device's saved identity has been read yet (it lives in localStorage). */
 	let loaded = $state(false);
@@ -73,7 +85,14 @@
 </svelte:head>
 
 <header>
-	<a class="title" href="/"><h1>{data.houseName}</h1></a>
+	<a class="title" href="/">
+		{#key heading}
+			<h1 in:slot={{ y: 8, duration: 220 }}>
+				{#if current && now}<Shape shape={current.shape} colour={current.colour} size={18} />{/if}
+				<span>{heading}</span>
+			</h1>
+		{/key}
+	</a>
 	<nav aria-label="Main">
 		{#each links as link (link.href)}
 			{#if page.url.pathname !== link.href}
@@ -108,8 +127,18 @@
 	}
 
 	.title {
+		display: grid;
 		min-width: 0;
 		text-decoration: none;
+		overflow: hidden;
+	}
+
+	.title h1 {
+		grid-area: 1 / 1;
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		text-transform: none;
 	}
 
 	h1 {

@@ -43,15 +43,27 @@
 	onMount(() => {
 		me.load();
 		theme.load();
+		loaded = true;
 		// Phones keep tabs open for days: pick up other people's changes when coming back.
 		const refresh = () => document.visibilityState === 'visible' && refreshAll();
 		document.addEventListener('visibilitychange', refresh);
 		return () => document.removeEventListener('visibilitychange', refresh);
 	});
 
-	// Forget a saved identity if that person has been removed from the house.
+	/** Whether this device's saved identity has been read yet (it lives in localStorage). */
+	let loaded = $state(false);
+	let prompted = false;
+
 	$effect(() => {
+		if (!loaded) return;
+		// Forget a saved identity if that person has been removed from the house.
 		if (me.id != null && !data.people.some((p) => p.id === me.id)) me.set(null);
+		// A device that hasn't picked anyone yet is asked straight away (once per visit;
+		// if they dismiss it, they'll be asked again when they first change something).
+		if (me.id == null && data.people.length && !prompted) {
+			prompted = true;
+			me.ask();
+		}
 	});
 </script>
 

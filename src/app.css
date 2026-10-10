@@ -1,0 +1,246 @@
+/* Monocraft — open-source Minecraft-style font (SIL OFL, see static/fonts/Monocraft-LICENSE.txt) */
+@font-face {
+	font-family: 'Monocraft';
+	src: url('/fonts/Monocraft.ttf') format('truetype');
+	font-weight: 400;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Monocraft';
+	src: url('/fonts/Monocraft-Bold.ttf') format('truetype');
+	font-weight: 600 700;
+	font-display: swap;
+}
+
+:root {
+	--paper: #f6f4f0;
+	--paper-2: #ecebe6;
+	--soft: #d3d0ca;
+	--mid: #78756f;
+	--ink: #1a1918;
+	--day-now: #ffffff;
+	--day-future: #e9e7e2;
+	--day-past: #d8d5cf;
+	--px: 4px;
+	--font-body: 'Monocraft', ui-monospace, monospace;
+	--font-head: 'Monocraft', ui-monospace, monospace;
+	color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) {
+		--paper: #141413;
+		--paper-2: #1f1e1c;
+		--soft: #353330;
+		--mid: #8f8c86;
+		--ink: #f3f1ec;
+		--day-now: #3a3936;
+		--day-future: #222120;
+		--day-past: #1a1918;
+		color-scheme: dark;
+	}
+}
+
+:root[data-theme='dark'] {
+	--paper: #141413;
+	--paper-2: #1f1e1c;
+	--soft: #353330;
+	--mid: #8f8c86;
+	--ink: #f3f1ec;
+	--day-now: #3a3936;
+	--day-future: #222120;
+	--day-past: #1a1918;
+	color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	-webkit-tap-highlight-color: transparent;
+}
+
+body {
+	margin: 0;
+	background: var(--paper);
+	color: var(--ink);
+	font-family: var(--font-body);
+	font-size: 18px;
+	line-height: 1.4;
+	-webkit-font-smoothing: none;
+	font-smooth: never;
+}
+
+h1,
+h2,
+h3,
+.head {
+	font-family: var(--font-head);
+	font-weight: 400;
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+	line-height: 1.1;
+	margin: 0;
+}
+
+a {
+	color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+}
+
+::selection {
+	background: var(--ink);
+	color: var(--paper);
+}
+
+:focus-visible {
+	outline: var(--px) dashed var(--ink);
+	outline-offset: calc(var(--px) * 2);
+}
+
+/* ---- pixel boxes: square border with notched corners + a stepped drop shadow ---- */
+
+.px-box {
+	background: var(--paper-2);
+	box-shadow:
+		0 calc(var(--px) * -1) 0 0 var(--ink),
+		0 var(--px) 0 0 var(--ink),
+		calc(var(--px) * -1) 0 0 0 var(--ink),
+		var(--px) 0 0 0 var(--ink),
+		calc(var(--px) * 2) calc(var(--px) * 2) 0 0 var(--soft);
+}
+
+.btn {
+	--shadow: var(--soft);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-height: 40px;
+	padding: 6px 14px;
+	border: 0;
+	background: var(--paper-2);
+	font-family: var(--font-head);
+	font-size: 16px;
+	text-transform: uppercase;
+	text-decoration: none;
+	cursor: pointer;
+	user-select: none;
+	box-shadow:
+		0 calc(var(--px) * -1) 0 0 var(--ink),
+		0 var(--px) 0 0 var(--ink),
+		calc(var(--px) * -1) 0 0 0 var(--ink),
+		var(--px) 0 0 0 var(--ink),
+		var(--px) calc(var(--px) * 2) 0 0 var(--shadow);
+	transition: transform 60ms steps(1);
+}
+
+.btn:hover {
+	background: var(--soft);
+}
+
+.btn:active {
+	transform: translate(0, var(--px));
+	box-shadow:
+		0 calc(var(--px) * -1) 0 0 var(--ink),
+		0 var(--px) 0 0 var(--ink),
+		calc(var(--px) * -1) 0 0 0 var(--ink),
+		var(--px) 0 0 0 var(--ink);
+}
+
+.btn.solid {
+	background: var(--ink);
+	color: var(--paper);
+}
+
+.btn.solid:hover {
+	background: color-mix(in srgb, var(--ink) 85%, var(--paper));
+}
+
+.btn.ghost {
+	background: transparent;
+	box-shadow: none;
+}
+
+.btn.ghost:hover {
+	background: var(--soft);
+}
+
+.btn:disabled {
+	opacity: 0.4;
+	cursor: default;
+	pointer-events: none;
+}
+
+.btn.icon {
+	min-width: 40px;
+	padding: 6px;
+}
+
+.field {
+	display: block;
+	width: 100%;
+	min-width: 0;
+	min-height: 40px;
+	padding: 6px 10px;
+	border: 0;
+	background: var(--paper);
+	box-shadow:
+		inset 0 0 0 var(--px) var(--ink),
+		inset var(--px) var(--px) 0 var(--px) var(--soft);
+	border-radius: 0;
+	font-size: 18px;
+}
+
+.field:focus {
+	outline: none;
+	box-shadow:
+		inset 0 0 0 var(--px) var(--ink),
+		inset var(--px) var(--px) 0 var(--px) var(--mid);
+}
+
+/* checkerboard dither, for things that need attention */
+.dither {
+	background-image: repeating-conic-gradient(var(--soft) 0 25%, transparent 0 50%);
+	background-size: var(--px) var(--px);
+}
+
+.label {
+	font-family: var(--font-head);
+	font-size: 14px;
+	text-transform: uppercase;
+	color: var(--mid);
+	letter-spacing: 0.04em;
+}
+
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-delay: 0ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}

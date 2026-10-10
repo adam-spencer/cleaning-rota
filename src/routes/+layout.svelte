@@ -1,0 +1,182 @@
+<script lang="ts">
+	import '../app.css';
+	import { onMount } from 'svelte';
+	import { onNavigate, refreshAll } from '$app/navigation';
+	import { page } from '$app/state';
+	import { attachDissolve, dissolveIn, dissolveOut } from '#lib/dissolve.ts';
+	import { pop } from '#lib/transitions.ts';
+	import { GLYPHS, SHAPES, bitmapPath } from '#lib/icons.ts';
+	import { me } from '#lib/me.svelte.ts';
+	import { theme } from '#lib/theme.svelte.ts';
+	import Pixel from '#lib/components/Pixel.svelte';
+	import Toast from '#lib/components/Toast.svelte';
+	import WhoAmI from '#lib/components/WhoAmI.svelte';
+	import type { LayoutProps } from './$types';
+
+	let { data, children }: LayoutProps = $props();
+
+	const favicon = `data:image/svg+xml,${encodeURIComponent(
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 9 9" shape-rendering="crispEdges"><rect x="-1" y="-1" width="9" height="9" fill="#f6f4f0"/><path d="${bitmapPath(SHAPES.diamond)}" fill="#1a1918"/></svg>`
+	)}`;
+
+	// The calendar link is only for phones: on wide screens the calendar is on the home page.
+	const links = [
+		{ href: '/', label: 'rota', narrowOnly: false },
+		{ href: '/calendar', label: 'calendar', narrowOnly: true },
+		{ href: '/setup', label: 'setup', narrowOnly: false }
+	];
+
+	onNavigate((navigation) => {
+		// Only dissolve between pages, not when stepping through weeks or months.
+		if (!navigation.to || navigation.from?.url.pathname === navigation.to.url.pathname) return;
+		return new Promise((resolve) => {
+			dissolveOut().then(() => {
+				resolve();
+				navigation.complete.then(dissolveIn, dissolveIn);
+			});
+		});
+	});
+
+	const themeIcons = { auto: GLYPHS.auto, light: GLYPHS.sun, dark: GLYPHS.moon };
+	const themeLabels = { auto: 'Theme: matches system', light: 'Theme: light', dark: 'Theme: dark' };
+
+	onMount(() => {
+		me.load();
+		theme.load();
+		// Phones keep tabs open for days: pick up other people's changes when coming back.
+		const refresh = () => document.visibilityState === 'visible' && refreshAll();
+		document.addEventListener('visibilitychange', refresh);
+		return () => document.removeEventListener('visibilitychange', refresh);
+	});
+
+	// Forget a saved identity if that person has been removed from the house.
+	$effect(() => {
+		if (me.id != null && !data.people.some((p) => p.id === me.id)) me.set(null);
+	});
+</script>
+
+<svelte:head>
+	<link rel="icon" href={favicon} />
+	<title>{data.houseName}</title>
+</svelte:head>
+
+<header>
+	<a class="title" href="/"><h1>{data.houseName}</h1></a>
+	<nav aria-label="Main">
+		{#each links as link (link.href)}
+			{#if page.url.pathname !== link.href}
+				<a href={link.href} class:narrow-only={link.narrowOnly}>{link.label}</a>
+			{/if}
+		{/each}
+		<button class="theme" onclick={() => theme.cycle()} aria-label={themeLabels[theme.current]} title={themeLabels[theme.current]}>
+			{#key theme.current}
+				<span in:pop><Pixel rows={themeIcons[theme.current]} size={14} /></span>
+			{/key}
+		</button>
+	</nav>
+</header>
+
+<main>
+	{@render children()}
+</main>
+
+<canvas class="dissolve" {@attach attachDissolve} aria-hidden="true"></canvas>
+<Toast />
+<WhoAmI people={data.people} />
+
+<style>
+	header {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 16px;
+		max-width: 1100px;
+		margin: 0 auto;
+		padding: 24px 20px 8px;
+	}
+
+	.title {
+		min-width: 0;
+		text-decoration: none;
+	}
+
+	h1 {
+		font-size: clamp(18px, 5vw, 24px);
+		overflow-wrap: anywhere;
+	}
+
+	nav {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+		flex: none;
+	}
+
+	.theme {
+		display: grid;
+		place-items: center;
+		width: 28px;
+		height: 28px;
+		margin: -6px -6px -6px 0;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--mid);
+		cursor: pointer;
+	}
+
+	.theme:hover {
+		color: var(--ink);
+	}
+
+	.theme span {
+		display: block;
+		line-height: 0;
+	}
+
+	nav a {
+		font-family: var(--font-head);
+		font-size: 15px;
+		color: var(--mid);
+		text-decoration: none;
+	}
+
+	nav a:hover {
+		color: var(--ink);
+		text-decoration: underline;
+		text-decoration-thickness: 2px;
+		text-underline-offset: 4px;
+	}
+
+	@media (min-width: 900px) {
+		.narrow-only {
+			display: none;
+		}
+	}
+
+	main {
+		max-width: 1100px;
+		margin: 0 auto;
+		padding: 24px 20px 80px;
+	}
+
+	.dissolve {
+		position: fixed;
+		top: 0;
+		left: 0;
+		z-index: 100;
+		width: 0;
+		height: 0;
+		pointer-events: none;
+		image-rendering: pixelated;
+	}
+
+	@media (max-width: 480px) {
+		header {
+			padding: 16px 16px 4px;
+		}
+		main {
+			padding: 20px 16px 64px;
+		}
+	}
+</style>

@@ -4,6 +4,7 @@
 	import { addDays, daysBetween, type Absence, type Person } from '#lib/rotation.ts';
 	import { draw, slot } from '#lib/transitions.ts';
 	import Pixel from './Pixel.svelte';
+	import Shape from './Shape.svelte';
 
 	let {
 		month,
@@ -187,13 +188,18 @@
 						class="line"
 						class:left={line.left}
 						class:right={line.right}
+						class:start={!line.left && person}
 						style:grid-column="{line.from + 1} / {line.to + 2}"
 						style:--colour={person?.colour}
 						style:--offset="{(line.lane - (week.lanes - 1) / 2) * 9}px"
 						aria-label="{person?.name} away {shortDate(line.absence.start_date)} to {shortDate(line.absence.end_date)}"
 						onclick={() => onabsence(line.absence)}
 						in:draw={{ delay: 80 + line.from * 30 }}
-					></button>
+					>
+						{#if !line.left && person}
+							<span class="who"><Shape shape={person.shape} colour={person.colour} size={14} /></span>
+						{/if}
+					</button>
 				{/each}
 			</div>
 		{/each}
@@ -345,6 +351,19 @@
 		cursor: pointer;
 	}
 
+	/* Where an absence begins, the person's shape leads the line. */
+	.line.start {
+		position: relative;
+		margin-left: 4px;
+		padding-left: 16px;
+	}
+
+	.who {
+		position: absolute;
+		left: 0;
+		top: 1px;
+	}
+
 	/* Lines carrying on from (or into) another week run right to the edge. */
 	.line.left {
 		margin-left: 0;
@@ -355,6 +374,6 @@
 	}
 
 	.line:hover {
-		padding: 5px 0;
+		padding-block: 5px;
 	}
 </style>

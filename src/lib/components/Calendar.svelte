@@ -82,6 +82,14 @@
 		})
 	);
 
+	const thisMonth = $derived(today.slice(0, 7));
+
+	function goThisMonth() {
+		if (month === thisMonth) return;
+		dir = thisMonth > month ? 1 : -1;
+		onmonth(thisMonth, dir);
+	}
+
 	function goMonth(by: number) {
 		dir = by;
 		const d = new Date(Date.UTC(year, monthNum - 1 + by, 1));
@@ -130,11 +138,11 @@
 <div class="calendar" bind:this={root}>
 	<div class="monthbar">
 		<button class="nav" onclick={() => goMonth(-1)} aria-label="Previous month"><Pixel rows={GLYPHS.left} size={12} /></button>
-		<div class="title">
+		<button class="title" onclick={goThisMonth} disabled={month === thisMonth} aria-label="Back to this month">
 			{#key month}
 				<h2 in:slot={{ y: 8 * dir, duration: 200 }}>{MONTH_NAMES[monthNum - 1]} {year}</h2>
 			{/key}
-		</div>
+		</button>
 		<button class="nav" onclick={() => goMonth(1)} aria-label="Next month"><Pixel rows={GLYPHS.right} size={12} /></button>
 	</div>
 
@@ -198,8 +206,24 @@
 	.title {
 		flex: 1;
 		display: grid;
+		min-height: 36px;
+		align-items: center;
+		padding: 0;
+		border: 0;
+		background: none;
 		text-align: center;
 		overflow: hidden;
+		cursor: pointer;
+	}
+
+	.title:disabled {
+		cursor: default;
+	}
+
+	.title:not(:disabled):hover h2 {
+		text-decoration: underline;
+		text-decoration-thickness: 2px;
+		text-underline-offset: 4px;
 	}
 
 	.title h2 {

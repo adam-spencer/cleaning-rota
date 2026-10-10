@@ -3,8 +3,9 @@
 	import { dateRange, relativeWeek } from '#lib/format.ts';
 	import { GLYPHS } from '#lib/icons.ts';
 	import { addDays, daysBetween, type Chore, type Person } from '#lib/rotation.ts';
-	import { draw, slot } from '#lib/transitions.ts';
+	import { slot } from '#lib/transitions.ts';
 	import Pixel from './Pixel.svelte';
+	import Scribble from './Scribble.svelte';
 	import Shape from './Shape.svelte';
 
 	interface Assignment {
@@ -32,22 +33,48 @@
 		ontoday: () => void;
 	} = $props();
 
-	/** Ticks shown immediately while the request is in flight. */
-	let optimistic = $state<Record<number, boolean>>({});
+	/**
+	 * Ticks shown immediately while the request is in flight, keyed by week *and* chore:
+	 * the same chore in another week must never pick up a pending tick.
+	 */
+	let optimistic = $state<Record<string, boolean>>({});
+
+	const tickKey = (w: string, choreId: number) => `${w}:${choreId}`;
+
+	// Once the week has changed, scribbles redraw as each week slides in (but not on first load).
+	// svelte-ignore state_referenced_locally
+	let shownWeek = week;
+	let changedWeek = $state(false);
+	$effect.pre(() => {
+		if (week !== shownWeek) {
+			shownWeek = week;
+			changedWeek = true;
+		}
+	});
+
+	/** How a row's scribble appears: drawn in full when ticked, replayed after the names slide in. */
+	function drawFor(a: Assignment, i: number) {
+		if (a.chore && tickKey(week, a.chore.id) in optimistic) return { delay: 0, duration: 420 };
+		if (changedWeek) return { delay: 160 + i * 45, duration: 320 };
+		return { delay: 0, duration: 0 };
+	}
 
 	const offset = $derived(daysBetween(currentWeek, week) / 7);
 
 	function isDone(a: Assignment): boolean {
-		return a.chore ? (optimistic[a.chore.id] ?? a.done !== null) : false;
+		return a.chore ? (optimistic[tickKey(week, a.chore.id)] ?? a.done !== null) : false;
 	}
 
 	async function toggle(a: Assignment) {
 		if (!a.chore) return;
-		const id = a.chore.id;
+		const key = tickKey(week, a.chore.id);
 		const done = !isDone(a);
-		optimistic[id] = done;
-		await send('POST', '/api/completions', { week, chore_id: id, person_id: a.person?.id ?? null, done });
-		delete optimistic[id];
+		optimistic[key] = done;
+		try {
+			await send('POST', '/api/completions', { week, chore_id: a.chore.id, person_id: a.person?.id ?? null, done });
+		} finally {
+			delete optimistic[key];
+		}
 	}
 </script>
 
@@ -90,7 +117,9 @@
 					</span>
 					<span class="arrow" aria-hidden="true"><span class="shaft"></span><Pixel rows={GLYPHS.right} size={10} /></span>
 					<span class="task">{a.chore?.name ?? 'week off'}</span>
-					{#if done}<span class="strike" in:draw out:draw={{ duration: 160 }}></span>{/if}
+					{#key week}
+						{#if done}<Scribble key="{week}:{a.chore?.id}" draw={drawFor(a, i)} />{/if}
+					{/key}
 				</button>
 				{#if a.away}<p class="away">away {a.away.toLowerCase()}</p>{/if}
 			</li>
@@ -248,18 +277,6 @@
 	.done .row {
 		color: var(--mid);
 	}
-
-	.strike {
-		position: absolute;
-		left: 0;
-		right: 0;
-		top: 50%;
-		height: 3px;
-		margin-top: -1px;
-		background: var(--ink);
-		pointer-events: none;
-	}
-
 	/* Overlaid in the row's bottom padding so it never changes the list's height
 	   (which would nudge everything when stepping between weeks). */
 	.away {

@@ -4,7 +4,6 @@ import { db, transaction } from './db';
 import {
 	addDays,
 	awayDays,
-	daysBetween,
 	describeAway,
 	isISODate,
 	rotate,
@@ -311,13 +310,13 @@ export function isMonth(value: unknown): value is string {
 	return typeof value === 'string' && /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
 }
 
-/** A Monday-first month grid: whole weeks covering the month, plus absences overlapping it. */
+/** Every month needs at most 6 week rows; always showing 6 keeps the calendar the same size. */
+const GRID_WEEKS = 6;
+
+/** A Monday-first month grid (always 6 weeks, padded with neighbouring days), plus absences overlapping it. */
 export function getMonth(month: string) {
-	const [y, m] = month.split('-').map(Number);
-	const first = `${month}-01`;
-	const last = addDays(m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, '0')}-01`, -1);
-	const gridStart = mondayOf(first);
-	const weeks = Math.ceil((daysBetween(gridStart, last) + 1) / 7);
+	const gridStart = mondayOf(`${month}-01`);
+	const weeks = GRID_WEEKS;
 	return {
 		month,
 		gridStart,

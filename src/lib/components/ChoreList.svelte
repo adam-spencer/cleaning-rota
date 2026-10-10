@@ -171,6 +171,7 @@
 	}
 
 	li {
+		position: relative;
 		grid-column: 1 / -1;
 		display: grid;
 		grid-template-columns: subgrid;
@@ -183,7 +184,7 @@
 		grid-template-columns: subgrid;
 		align-items: center;
 		width: 100%;
-		min-height: 56px;
+		min-height: 60px;
 		padding: 8px 4px;
 		border: 0;
 		background: none;
@@ -259,11 +260,17 @@
 		pointer-events: none;
 	}
 
+	/* Overlaid in the row's bottom padding so it never changes the list's height
+	   (which would nudge everything when stepping between weeks). */
 	.away {
-		grid-column: 1 / -1;
-		margin: -6px 0 0 28px;
-		font-size: 14px;
+		position: absolute;
+		left: 28px;
+		bottom: -4px;
+		margin: 0;
+		font-size: 13px;
+		line-height: 1;
 		color: var(--mid);
+		pointer-events: none;
 	}
 
 	@media (max-width: 420px) {

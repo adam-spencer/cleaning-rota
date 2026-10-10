@@ -97,10 +97,15 @@
 	}
 
 	// One gesture model for mouse, touch and pen: press a day, optionally drag, release.
-	// Same day = a tap (onday); different day = a range (onrange).
+	// Different day = a range (onrange, on release); same day = a tap (onday, on click).
+	// Taps wait for the click: on touch it arrives after pointerup and lands on whatever is
+	// under the finger by then, so opening a dialog on pointerup lets it hit the backdrop.
+	let ranged = false;
+
 	function down(e: PointerEvent, day: string) {
 		if (e.button !== 0) return;
 		dragFrom = dragTo = day;
+		ranged = false;
 	}
 
 	function move(e: PointerEvent) {
@@ -115,8 +120,14 @@
 		const from = dragFrom;
 		const to = dragTo ?? dragFrom;
 		dragFrom = dragTo = null;
-		if (from === to) onday(from);
-		else onrange(from, to);
+		if (from === to) return;
+		ranged = true;
+		onrange(from, to);
+	}
+
+	function click(day: string) {
+		if (ranged) ranged = false;
+		else onday(day);
 	}
 
 	$effect(() => {
@@ -164,7 +175,7 @@
 						data-day={day}
 						aria-label={shortDate(day)}
 						onpointerdown={(e) => down(e, day)}
-						onclick={(e) => e.detail === 0 && onday(day)}
+						onclick={() => click(day)}
 					>
 						<span class="num">{Number(day.slice(8))}</span>
 					</button>

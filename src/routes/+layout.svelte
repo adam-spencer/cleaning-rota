@@ -81,6 +81,8 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<!-- iOS home screen icon: same diamond as the favicon, but iOS needs a PNG. -->
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 	<title>{data.houseName}</title>
 </svelte:head>
 

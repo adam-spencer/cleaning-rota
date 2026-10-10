@@ -214,6 +214,15 @@
 		image-rendering: pixelated;
 	}
 
+	/* On phones the greeting gets the full width, with the links on their own row beneath. */
+	@media (max-width: 600px) {
+		header {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 10px;
+		}
+	}
+
 	@media (max-width: 480px) {
 		header {
 			padding: 16px 16px 4px;

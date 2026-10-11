@@ -1,25 +1,34 @@
 <script lang="ts">
-	import { squiggle } from '#lib/squiggle.ts';
+	import { pixelSquiggle } from '#lib/squiggle.ts';
 	import { fade } from 'svelte/transition';
-	import { pencil } from '#lib/transitions.ts';
+	import { draw as reveal } from '#lib/transitions.ts';
 
-	// A pencil scribble that fills its box; `key` keeps its shape stable.
-	// `draw` animates it stroke by stroke (duration 0 shows it already finished).
+	// A pixelated pencil scribble that fills its box; `key` keeps its shape stable.
+	// `draw` reveals it a column at a time (duration 0 shows it already finished).
 	let {
 		key,
 		draw = { delay: 0, duration: 0 },
-		height = 34
-	}: { key: string; draw?: { delay: number; duration: number }; height?: number } = $props();
+		height = 34,
+		cell = 3
+	}: { key: string; draw?: { delay: number; duration: number }; height?: number; cell?: number } = $props();
 
 	let width = $state(0);
-	const d = $derived(width ? squiggle(key, width, height) : '');
+	const s = $derived(width ? pixelSquiggle(key, width, height, cell) : null);
 </script>
 
 <div class="scribble" style:height="{height}px" bind:clientWidth={width} aria-hidden="true" out:fade={{ duration: 120 }}>
-	{#if d}
-		<svg {width} {height} viewBox="0 0 {width} {height}">
-			<path class="graphite" {d} pathLength="1" in:pencil={{ delay: draw.delay + 40, duration: draw.duration }} />
-			<path {d} pathLength="1" in:pencil={draw} />
+	{#if s}
+		<svg
+			width={s.cols * cell}
+			height={s.rows * cell}
+			viewBox="0 0 {s.cols} {s.rows}"
+			shape-rendering="crispEdges"
+			style:left="{s.x}px"
+			style:top="{s.y}px"
+			in:reveal={{ ...draw, frames: s.cols }}
+		>
+			<path class="grain" d={s.grain} />
+			<path d={s.ink} />
 		</svg>
 	{/if}
 </div>
@@ -35,26 +44,17 @@
 	}
 
 	svg {
+		position: absolute;
 		display: block;
-		overflow: visible;
 	}
 
 	path {
-		fill: none;
-		stroke: var(--ink);
-		stroke-width: 2.5;
-		stroke-linecap: round;
-		stroke-linejoin: miter;
-		stroke-miterlimit: 3;
-		stroke-dasharray: 1;
-		stroke-dashoffset: 0;
+		fill: var(--ink);
 		opacity: 0.85;
 	}
 
-	/* A fainter, offset second pass gives it a graphite texture. */
-	.graphite {
-		stroke-width: 1.2;
-		opacity: 0.35;
-		translate: 0.6px 1.4px;
+	/* Some pixels come out lighter, like graphite catching on the paper. */
+	.grain {
+		opacity: 0.4;
 	}
 </style>

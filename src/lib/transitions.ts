@@ -48,14 +48,3 @@ export function draw(_node: Element, { delay = 0, duration = 280, frames = 10 } 
 		css: (t) => `clip-path: inset(0 ${(1 - step(t, frames)) * 100}% 0 0)`
 	};
 }
-
-/** Draw an SVG stroke along its length, like a pencil (use pathLength="1" on the path). */
-export function pencil(_node: Element, { delay = 0, duration = 420 } = {}): TransitionConfig {
-	if (reduced() || duration === 0) return { duration: 0 };
-	return {
-		delay,
-		duration,
-		easing: (t) => t * t * (3 - 2 * t),
-		css: (t) => `stroke-dashoffset: ${1 - t}`
-	};
-}

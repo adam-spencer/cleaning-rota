@@ -13,7 +13,8 @@ import {
 	type Shift,
 	type Absence,
 	type Chore,
-	type Person
+	type Person,
+	type Slot
 } from '#lib/rotation.ts';
 
 type Param = null | number | string;
@@ -210,10 +211,22 @@ export function getWeek(weekStart: string): Assignment[] {
 		).map((c) => [c.chore_id, c])
 	);
 
+	// In past weeks a finished chore stays credited to whoever did it, even if the roster or
+	// rotation changed since. They swap places with whoever the rotation now puts there, so
+	// nobody shows up twice.
+	const creditedTo = (s: Slot) => (s.chore ? completions.get(s.chore.id)?.person_id : undefined);
+	if (isPast) {
+		for (const slot of slots) {
+			const credited = people.find((p) => p.id === creditedTo(slot));
+			if (!credited || credited.id === slot.person?.id) continue;
+			const other = slots.find((s) => s.person?.id === credited.id && creditedTo(s) !== credited.id);
+			if (other) other.person = slot.person;
+			slot.person = credited;
+		}
+	}
+
 	return slots.map(({ chore, person }) => {
 		const c = chore ? completions.get(chore.id) : undefined;
-		// In past weeks a finished chore stays credited to whoever did it, even if the roster changed since.
-		if (isPast && c && c.person_id !== person?.id) person = people.find((p) => p.id === c.person_id) ?? person;
 		const days = person ? awayDays(absences, person.id, weekStart) : [];
 		return {
 			chore,

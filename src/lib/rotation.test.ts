@@ -72,6 +72,19 @@ describe('rotate', () => {
 		expect(slots.filter((s) => s.chore === null)).toHaveLength(1);
 	});
 
+	it('alternates weeks on and off, swapping chores, with half as many chores as people', () => {
+		const two = chores.slice(0, 2);
+		const weeks = [0, 1, 2, 3].map((w) => rotate(people, two, w));
+		for (const slots of weeks) expect(slots.map((s) => s.chore?.name ?? null)).toEqual(['Kitchen', 'Bathroom', null, null]);
+		for (const p of people) {
+			const done = weeks.map((slots) => slots.find((s) => s.person === p)!.chore?.name ?? null);
+			expect(done.filter(Boolean)).toHaveLength(2);
+			expect(new Set(done.filter(Boolean)).size).toBe(2);
+			expect(done.findIndex((c, w) => c !== null && done[w + 1] != null)).toBe(-1);
+			expect(done[0] === null).not.toBe(done[3] === null); // also alternates across the wrap
+		}
+	});
+
 	it('handles an empty roster', () => {
 		expect(rotate([], [], 3)).toEqual([]);
 	});

@@ -10,7 +10,7 @@ The app has three pages:
 - **Calendar**: a calendar of time away. Tap a start and end day (or drag across them) to add a period.
 - **Setup**: manage housemates and chores. The order of the list sets the rotation order, and you can nudge the rotation forward or back.
 
-Each week, everyone moves one chore down the list. Anyone who is away that week is flagged, but their chore is never reassigned.
+Each week, everyone moves one chore down the list. If there are fewer chores than people, the weeks off are spread out evenly: with four people and two chores, everyone alternates a week on and a week off, swapping chores each time. Anyone who is away that week is flagged, but their chore is never reassigned.
 
 Data is stored in `data/rota.db` by default. Set `DB_PATH` to use a different location.
 

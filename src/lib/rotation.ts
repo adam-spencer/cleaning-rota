@@ -90,13 +90,16 @@ function mod(a: number, n: number): number {
  * Chores and people are both padded to the same number of slots; each week every
  * person moves on to the next chore. Equal counts give a plain 1:1 rotation; if they
  * ever differ, a null person means an unassigned chore and a null chore a week off.
+ * Weeks off are spread evenly between the chores, so with 4 people and 2 chores
+ * everyone alternates a week on and a week off. Chores are listed first.
  */
 export function rotate(people: Person[], chores: Chore[], index: number): Slot[] {
 	const n = Math.max(people.length, chores.length);
-	return Array.from({ length: n }, (_, i) => ({
-		chore: chores[i] ?? null,
-		person: people[mod(i - index, n)] ?? null
-	}));
+	const choreAt: (Chore | null)[] = Array(n).fill(null);
+	chores.forEach((chore, j) => (choreAt[Math.floor((j * n) / chores.length)] = chore));
+	return choreAt
+		.map((chore, i) => ({ chore, person: people[mod(i - index, n)] ?? null }))
+		.sort((a, b) => Number(!a.chore) - Number(!b.chore));
 }
 
 /** Which days (Mon..Sun) of the week starting `weekStart` the person is away. */

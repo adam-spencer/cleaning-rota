@@ -130,7 +130,7 @@
 						{#if done}<Scribble key="{week}:{a.chore?.id}" draw={drawFor(a, i)} />{/if}
 					{/key}
 				</button>
-				{#if a.away}<p class="away">away {a.away.toLowerCase()}</p>{/if}
+				{#if a.away}<p class="away">away {a.away}</p>{/if}
 			</li>
 		{/each}
 	</ul>
@@ -175,7 +175,6 @@
 		gap: 12px;
 		font-family: var(--font-head);
 		font-size: 14px;
-		text-transform: uppercase;
 	}
 
 	.rel {

@@ -122,7 +122,7 @@ describe('away', () => {
 	it('clips absences to the week, including ones that straddle its edges', () => {
 		const days = awayDays([abs(1, '2026-10-08', '2026-10-14'), abs(1, '2026-10-18', '2026-10-25')], 1, week);
 		expect(days).toEqual([true, true, true, false, false, false, true]);
-		expect(describeAway(days)).toBe('MON–WED, SUN');
+		expect(describeAway(days)).toBe('Mon–Wed, Sun');
 	});
 
 	it('ignores other people and non-overlapping absences', () => {
@@ -131,7 +131,7 @@ describe('away', () => {
 	});
 
 	it('describes whole weeks and single days', () => {
-		expect(describeAway(awayDays([abs(1, '2026-10-01', '2026-10-31')], 1, week))).toBe('ALL WEEK');
-		expect(describeAway(awayDays([abs(1, '2026-10-16', '2026-10-16')], 1, week))).toBe('FRI');
+		expect(describeAway(awayDays([abs(1, '2026-10-01', '2026-10-31')], 1, week))).toBe('all week');
+		expect(describeAway(awayDays([abs(1, '2026-10-16', '2026-10-16')], 1, week))).toBe('Fri');
 	});
 });

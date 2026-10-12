@@ -28,7 +28,7 @@ export interface Slot {
 
 const DAY = 86_400_000;
 
-export const DAY_NAMES = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+export const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export function parseISO(iso: string): number {
 	const [y, m, d] = iso.split('-').map(Number);
@@ -115,9 +115,9 @@ export function awayDays(absences: Absence[], personId: number, weekStart: strin
 	return days;
 }
 
-/** e.g. null, "ALL WEEK", "MON–WED", "MON, FRI–SUN" */
+/** e.g. null, "all week", "Mon–Wed", "Mon, Fri–Sun" */
 export function describeAway(days: boolean[]): string | null {
-	if (days.every(Boolean)) return 'ALL WEEK';
+	if (days.every(Boolean)) return 'all week';
 	const ranges: string[] = [];
 	for (let d = 0; d < 7; d++) {
 		if (!days[d]) continue;

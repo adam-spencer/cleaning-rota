@@ -1,18 +1,18 @@
 import { parseISO } from './rotation';
 
-const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 export const MONTH_NAMES = [
 	'January', 'February', 'March', 'April', 'May', 'June',
 	'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-/** "12 OCT" */
+/** "12 Oct" */
 export function shortDate(iso: string): string {
 	const d = new Date(parseISO(iso));
 	return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`;
 }
 
-/** "12–18 OCT" or "28 SEP – 4 OCT" */
+/** "12–18 Oct" or "28 Sep – 4 Oct" */
 export function dateRange(from: string, to: string): string {
 	if (from === to) return shortDate(from);
 	const a = new Date(parseISO(from));
